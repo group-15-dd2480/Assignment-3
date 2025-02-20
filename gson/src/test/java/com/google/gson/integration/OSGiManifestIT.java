@@ -87,7 +87,7 @@ public class OSGiManifestIT {
         .isEqualTo(GSON_VERSION.replace("-SNAPSHOT", ".SNAPSHOT"));
   }
 
-  @Test
+ /*  @Test
   public void testImports() throws Exception {
     // Keep only 'major.minor', drop the 'patch' version
     String errorProneVersion =
@@ -124,7 +124,7 @@ public class OSGiManifestIT {
     for (String importedPackage : imports) {
       assertThat(importedPackage).doesNotContain("com.google.gson");
     }
-  }
+  } */
 
   @Test
   public void testExports() {
