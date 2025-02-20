@@ -163,6 +163,26 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>jacoco-initialize</id>
+                <goals>
+                    <goal>prepare-agent</goal>
+                </goals>
+            </execution>
+            <execution>
+                <id>jacoco-report</id>
+                <phase>verify</phase>
+                <goals>
+                    <goal>report</goal>
+                </goals>
+            </execution>
+        </executions>
+      </plugin>
+
       <!--
         Plugins for test execution
       -->
@@ -177,7 +197,7 @@
             run with e.g. Java 11, but Maven toolchain requirements (unlike Gradle ones)
             don't seem to be portable (every developer would have to set up toolchain
             configuration locally). -->
-          <argLine>--illegal-access=deny</argLine>
+          <argLine>${argLine} --illegal-access=deny</argLine>
         </configuration>
       </plugin>
       <!-- Failsafe plugin for running integration tests against final JAR, see `*IT.java` test classes -->
