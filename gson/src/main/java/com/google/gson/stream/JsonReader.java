@@ -30,6 +30,8 @@ import java.io.Reader;
 import java.util.Arrays;
 import java.util.Objects;
 
+import com.google.gson.Coverage;
+
 /**
  * Reads a JSON (<a href="https://www.ietf.org/rfc/rfc8259.txt">RFC 8259</a>) encoded value as a
  * stream of tokens. This stream includes both literal values (strings, numbers, booleans, and
@@ -1511,13 +1513,21 @@ public class JsonReader implements Closeable {
      * before any (potentially indirect) call to fillBuffer() and reread both
      * 'p' and 'l' after any (potentially indirect) call to the same method.
      */
+    // +1
+    Coverage.sample();
     char[] buffer = this.buffer;
     int p = pos;
     int l = limit;
     while (true) {
+      // +1
+      Coverage.sample();
       if (p == l) {
+        // +1
+        Coverage.sample();
         pos = p;
         if (!fillBuffer(1)) {
+          // +1
+          Coverage.sample();
           break;
         }
         p = pos;
@@ -1526,20 +1536,30 @@ public class JsonReader implements Closeable {
 
       int c = buffer[p++];
       if (c == '\n') {
+        // +1
+        Coverage.sample();
         lineNumber++;
         lineStart = p;
         continue;
       } else if (c == ' ' || c == '\r' || c == '\t') {
+        // +1
+        Coverage.sample();
         continue;
       }
 
       if (c == '/') {
+        // +1
+        Coverage.sample();
         pos = p;
         if (p == l) {
+          // +1
+          Coverage.sample();
           pos--; // push back '/' so it's still in the buffer when this method returns
           boolean charsLoaded = fillBuffer(2);
           pos++; // consume the '/' again
           if (!charsLoaded) {
+            // +1
+            Coverage.sample();
             return c;
           }
         }
@@ -1549,8 +1569,12 @@ public class JsonReader implements Closeable {
         switch (peek) {
           case '*':
             // skip a /* c-style comment */
+            // +1
+            Coverage.sample();
             pos++;
             if (!skipTo("*/")) {
+              // +1
+              Coverage.sample();
               throw syntaxError("Unterminated comment");
             }
             p = pos + 2;
@@ -1559,6 +1583,8 @@ public class JsonReader implements Closeable {
 
           case '/':
             // skip a // end-of-line comment
+            // +1
+            Coverage.sample();
             pos++;
             skipToEndOfLine();
             p = pos;
@@ -1566,9 +1592,13 @@ public class JsonReader implements Closeable {
             continue;
 
           default:
+            // +1  
+            Coverage.sample();
             return c;
         }
       } else if (c == '#') {
+        // +1
+        Coverage.sample();
         pos = p;
         /*
          * Skip a # hash end-of-line comment. The JSON RFC doesn't
@@ -1580,13 +1610,19 @@ public class JsonReader implements Closeable {
         p = pos;
         l = limit;
       } else {
+        // +1
+        Coverage.sample();
         pos = p;
         return c;
       }
     }
     if (throwOnEof) {
+      // +1
+      Coverage.sample();
       throw new EOFException("End of input" + locationString());
     } else {
+      // +1
+      Coverage.sample();
       return -1;
     }
   }
