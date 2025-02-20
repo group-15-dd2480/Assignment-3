@@ -25,6 +25,8 @@ module com.google.gson {
   exports com.google.gson.reflect;
   exports com.google.gson.stream;
 
+  requires com.github.javaparser.core;
+
   // Optional dependency on Error Prone Annotations
   requires static com.google.errorprone.annotations;
 
