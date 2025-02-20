@@ -23,6 +23,10 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.Comparator;
@@ -337,6 +341,18 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
    */
   private void rebalance(Node<K, V> unbalanced, boolean insert) {
     for (Node<K, V> node = unbalanced; node != null; node = node.parent) {
+      Path path = Paths.get("coverage.txt");
+      try {
+        if (!Files.exists(path)) Files.createFile(path);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      try {
+        Files.write(path, ("start" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+        Files.write(path, ("1" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
       Node<K, V> left = node.left;
       Node<K, V> right = node.right;
       int leftHeight = left != null ? left.height : 0;
@@ -344,6 +360,11 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
 
       int delta = leftHeight - rightHeight;
       if (delta == -2) {
+        try {
+          Files.write(path, ("2" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
         Node<K, V> rightLeft = right.left;
         Node<K, V> rightRight = right.right;
         int rightRightHeight = rightRight != null ? rightRight.height : 0;
@@ -351,17 +372,44 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
 
         int rightDelta = rightLeftHeight - rightRightHeight;
         if (rightDelta == -1 || (rightDelta == 0 && !insert)) {
+          try {
+            Files.write(path, ("3" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
           rotateLeft(node); // AVL right right
         } else {
+          try {
+            Files.write(path, ("4" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
           assert (rightDelta == 1);
           rotateRight(right); // AVL right left
           rotateLeft(node);
         }
         if (insert) {
+          try {
+            Files.write(path, ("5" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+            Files.write(path, ("end" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
           break; // no further rotations will be necessary
+        } else {
+          try {
+            Files.write(path, ("6" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
         }
 
       } else if (delta == 2) {
+        try {
+          Files.write(path, ("7" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
         Node<K, V> leftLeft = left.left;
         Node<K, V> leftRight = left.right;
         int leftRightHeight = leftRight != null ? leftRight.height : 0;
@@ -369,28 +417,89 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
 
         int leftDelta = leftLeftHeight - leftRightHeight;
         if (leftDelta == 1 || (leftDelta == 0 && !insert)) {
+          try {
+            Files.write(path, ("8" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
           rotateRight(node); // AVL left left
         } else {
+          try {
+            Files.write(path, ("9" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
           assert (leftDelta == -1);
           rotateLeft(left); // AVL left right
           rotateRight(node);
         }
         if (insert) {
+          try {
+            Files.write(path, ("10" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+            Files.write(path, ("end" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
           break; // no further rotations will be necessary
+        } else {
+          try {
+            Files.write(path, ("11" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
         }
 
       } else if (delta == 0) {
+        try {
+          Files.write(path, ("12" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
         node.height = leftHeight + 1; // leftHeight == rightHeight
         if (insert) {
+          try {
+            Files.write(path, ("13" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+            Files.write(path, ("end" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
           break; // the insert caused balance, so rebalancing is done!
+        } else {
+          try {
+            Files.write(path, ("14" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
         }
 
       } else {
+        try {
+          Files.write(path, ("15" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
         assert (delta == -1 || delta == 1);
         node.height = Math.max(leftHeight, rightHeight) + 1;
         if (!insert) {
+          try {
+            Files.write(path, ("16" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+            Files.write(path, ("end" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
           break; // the height hasn't changed, so rebalancing is done!
+        } else {
+          try {
+            Files.write(path, ("17" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
         }
+      }
+      try {
+        Files.write(path, ("end" + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+      } catch (IOException e) {
+        e.printStackTrace();
       }
     }
   }
@@ -673,7 +782,8 @@ public final class LinkedTreeMap<K, V> extends AbstractMap<K, V> implements Seri
   }
 
   private void readObject(ObjectInputStream in) throws IOException {
-    // Don't permit directly deserializing this class; writeReplace() should have written a
+    // Don't permit directly deserializing this class; writeReplace() should have
+    // written a
     // replacement
     throw new InvalidObjectException("Deserialization is unsupported");
   }
