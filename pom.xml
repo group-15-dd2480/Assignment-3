@@ -98,6 +98,13 @@
       </dependency>
 
       <dependency>
+        <groupId>com.github.javaparser</groupId>
+        <artifactId>javaparser-core</artifactId>
+        <version>3.26.3</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <dependency>
         <groupId>com.google.truth</groupId>
         <artifactId>truth</artifactId>
         <version>1.4.4</version>
