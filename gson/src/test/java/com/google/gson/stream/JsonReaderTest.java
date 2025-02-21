@@ -28,12 +28,15 @@ import static com.google.gson.stream.JsonToken.NUMBER;
 import static com.google.gson.stream.JsonToken.STRING;
 import static org.junit.Assert.assertThrows;
 
+import com.google.gson.Coverage;
 import com.google.gson.Strictness;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.Arrays;
+
+import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -2168,6 +2171,16 @@ public final class JsonReaderTest {
         throw new AssertionError("Unsupported expectation value: " + expectation);
       }
     }
+  }
+
+  @AfterClass
+  public static void saveCoverage() {
+    Runtime.getRuntime().addShutdownHook( new Thread() {
+      public void run() {
+        Coverage.saveCoverage("coverage.txt");
+        Coverage.generateCoverageMarkdown("coverage.md");
+      }
+    });
   }
 
   /** Returns a reader that returns one character at a time. */
