@@ -26,6 +26,7 @@ import static com.google.gson.stream.JsonToken.NAME;
 import static com.google.gson.stream.JsonToken.NULL;
 import static com.google.gson.stream.JsonToken.NUMBER;
 import static com.google.gson.stream.JsonToken.STRING;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 import com.google.gson.Strictness;
@@ -2121,6 +2122,23 @@ public final class JsonReaderTest {
     reader.setStrictness(Strictness.LENIENT);
     JsonToken token = reader.peek();
     assertThat(token).isEqualTo(JsonToken.NUMBER);
+  }
+
+  @Test
+  public void reachUnreachedCodeAndReturnCorrectResult() throws IOException {
+
+      JsonReader reader = new JsonReader(reader("tru"));
+      boolean unused = reader.fillBuffer(1); // Fill the buffer initially
+
+      // Set up the buffer and position to simulate the test scenario
+      reader.pos = 0;
+      reader.limit = 3; // Only 3 characters "tru"
+
+      // Call the method to test
+      int result = reader.peekKeyword();
+
+      // Assert that the method returns PEEKED_NONE
+      assertEquals(JsonReader.PEEKED_NONE, result);
   }
 
   /** Test that an unclosed c-style comment throws invalid syntax exception. */
