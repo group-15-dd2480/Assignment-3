@@ -28,6 +28,7 @@ import static com.google.gson.stream.JsonToken.NUMBER;
 import static com.google.gson.stream.JsonToken.STRING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
 
 import com.google.gson.Strictness;
 import java.io.EOFException;
@@ -2159,7 +2160,7 @@ public final class JsonReaderTest {
   }
 
   @Test
-  public void reachUnreachedCodeAndReturnCorrectResult() throws IOException {
+  public void peekKeywordReachUnreachedCodeAndReturnCorrectResult() throws IOException {
 
       JsonReader reader = new JsonReader(reader("tru"));
       boolean unused = reader.fillBuffer(1); // Fill the buffer initially
@@ -2173,6 +2174,21 @@ public final class JsonReaderTest {
 
       // Assert that the method returns PEEKED_NONE
       assertEquals(JsonReader.PEEKED_NONE, result);
+  }
+
+  @Test
+  public void fillBufferThrowIOExceptionOnInvalidRead() {
+    JsonReader reader = new JsonReader(reader("something :)"));
+    JsonReader.SIM_EXC = true; // Simulate I/O error in fillBuffer
+
+    try {
+      boolean unused = reader.fillBuffer(1);
+      JsonReader.SIM_EXC = false; // Turn of simulated I/O error for other tests
+      fail("Expected IOException to be thrown");
+    } catch (IOException e) {
+      JsonReader.SIM_EXC = false; // Turn of simulated I/O error for other tests
+      assertEquals("Simulated I/O error", e.getMessage());
+    }
   }
 
   /** Test that an unclosed c-style comment throws invalid syntax exception. */
