@@ -2,7 +2,7 @@ package com.google.gson;
 
 import java.io.*;
 import java.util.*;
-
+@SuppressWarnings("unchecked")
 public class Coverage {
     private static final Set<String> executedLines = new HashSet<>();
 

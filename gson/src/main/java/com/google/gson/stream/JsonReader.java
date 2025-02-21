@@ -16,10 +16,7 @@
 
 package com.google.gson.stream;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.Strictness;
-import com.google.gson.TypeAdapter;
+import com.google.gson.*;
 import com.google.gson.internal.JsonReaderInternalAccess;
 import com.google.gson.internal.TroubleshootingGuide;
 import com.google.gson.internal.bind.JsonTreeReader;
@@ -1375,19 +1372,23 @@ public class JsonReader implements Closeable {
     do {
       int p = peeked;
       if (p == PEEKED_NONE) {
+        Coverage.sample();
         p = doPeek();
       }
 
       switch (p) {
         case PEEKED_BEGIN_ARRAY:
+          Coverage.sample();
           push(JsonScope.EMPTY_ARRAY);
           count++;
           break;
         case PEEKED_BEGIN_OBJECT:
+          Coverage.sample();
           push(JsonScope.EMPTY_OBJECT);
           count++;
           break;
         case PEEKED_END_ARRAY:
+          Coverage.sample();
           stackSize--;
           count--;
           break;
@@ -1395,6 +1396,7 @@ public class JsonReader implements Closeable {
           // Only update when object end is explicitly skipped, otherwise stack is not updated
           // anyways
           if (count == 0) {
+            Coverage.sample();
             // Free the last path name so that it can be garbage collected
             pathNames[stackSize - 1] = null;
           }
@@ -1402,48 +1404,60 @@ public class JsonReader implements Closeable {
           count--;
           break;
         case PEEKED_UNQUOTED:
+          Coverage.sample();
           skipUnquotedValue();
           break;
         case PEEKED_SINGLE_QUOTED:
+          Coverage.sample();
           skipQuotedValue('\'');
           break;
         case PEEKED_DOUBLE_QUOTED:
+          Coverage.sample();
           skipQuotedValue('"');
           break;
         case PEEKED_UNQUOTED_NAME:
+          Coverage.sample();
           skipUnquotedValue();
           // Only update when name is explicitly skipped, otherwise stack is not updated anyways
           if (count == 0) {
+            Coverage.sample();
             pathNames[stackSize - 1] = "<skipped>";
           }
           break;
         case PEEKED_SINGLE_QUOTED_NAME:
+          Coverage.sample();
           skipQuotedValue('\'');
           // Only update when name is explicitly skipped, otherwise stack is not updated anyways
           if (count == 0) {
+            Coverage.sample();
             pathNames[stackSize - 1] = "<skipped>";
           }
           break;
         case PEEKED_DOUBLE_QUOTED_NAME:
+          Coverage.sample();
           skipQuotedValue('"');
           // Only update when name is explicitly skipped, otherwise stack is not updated anyways
           if (count == 0) {
+            Coverage.sample();
             pathNames[stackSize - 1] = "<skipped>";
           }
           break;
         case PEEKED_NUMBER:
+          Coverage.sample();
           pos += peekedNumberLength;
           break;
         case PEEKED_EOF:
+          Coverage.sample();
           // Do nothing
           return;
         default:
+          Coverage.sample();
           // For all other tokens there is nothing to do; token has already been consumed from
           // underlying reader
       }
       peeked = PEEKED_NONE;
     } while (count > 0);
-
+    Coverage.sample();
     pathIndices[stackSize - 1]++;
   }
 

@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
-
+@SuppressWarnings("unchecked")
 public class CoverageAnalyzer {
     private final Map<String, List<Integer>> coveragePoints = new HashMap<>();
 

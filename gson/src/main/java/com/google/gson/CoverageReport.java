@@ -2,7 +2,7 @@ package com.google.gson;
 
 import java.io.*;
 import java.util.*;
-
+@SuppressWarnings("unchecked")
 public class CoverageReport {
     public static void generateReport(String outputFile, Map<String, List<Integer>> coveragePoints, Set<String> executedLines) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {

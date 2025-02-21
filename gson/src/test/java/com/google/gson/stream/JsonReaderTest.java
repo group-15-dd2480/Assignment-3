@@ -2108,6 +2108,35 @@ public final class JsonReaderTest {
     assertThat(token).isEqualTo(JsonToken.NUMBER);
   }
 
+  /**
+   * Test for skipping value if unquoted name
+   * @throws IOException if invalid input
+   */
+  @Test
+  public void testSkipUnquotedName() throws IOException {
+    JsonReader reader = new JsonReader(new StringReader("{key: 123}"));
+    reader.setStrictness(Strictness.LENIENT); // Unquoted names require lenient mode
+    reader.beginObject();
+    reader.skipValue(); // Skipping the unquoted name
+    assertThat(reader.peek()).isEqualTo(JsonToken.NUMBER);
+    assertThat(reader.nextInt()).isEqualTo(123);
+    reader.endObject();
+  }
+  /**
+   * Test for skipping value if EOF
+   * @throws IOException if invalid input
+   */
+  @Test
+  public void testSkipAtEof() throws IOException {
+    JsonReader reader = new JsonReader(new StringReader("{}"));
+    reader.beginObject();
+    reader.endObject();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+
+    reader.skipValue(); // Attempting to skip at EOF
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+  }
+
   private static void assertStrictError(MalformedJsonException exception, String expectedLocation) {
     assertThat(exception)
         .hasMessageThat()
