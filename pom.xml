@@ -137,61 +137,6 @@
         </executions>
       </plugin>
 
-      <!-- Spotless plugin: keeps the code formatted following the google-java-styleguide -->
-      <plugin>
-        <groupId>com.diffplug.spotless</groupId>
-        <artifactId>spotless-maven-plugin</artifactId>
-        <version>2.44.2</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-        <!-- Note: The configuration here is not specific to the `<execution>` above to allow users to run
-          `mvn spotless:apply` from the command line, using the same configuration -->
-        <configuration>
-          <!-- Perform some basic formatting for non-Java code -->
-          <formats>
-            <format>
-              <includes>
-                <include>*.md</include>
-                <include>*.xml</include>
-                <include>.github/**/*.yml</include>
-                <include>.gitignore</include>
-              </includes>
-              <!-- For Markdown files removing trailing whitespace causes issues for hard line breaks,
-                which use two trailing spaces. However, the trailing spaces are difficult to notice anyway;
-                prefer a trailing `\` instead of two spaces. -->
-              <trimTrailingWhitespace />
-              <endWithNewline />
-              <indent>
-                <spaces>true</spaces>
-                <!-- This seems to mostly (or only?) affect the suggested fix in case code contains tabs -->
-                <spacesPerTab>2</spacesPerTab>
-              </indent>
-            </format>
-          </formats>
-
-          <java>
-            <excludes>
-              <!-- Exclude classes which need Java 17 for compilation; Google Java Format internally relies on javac,
-                so formatting will fail if build is executed with JDK 11 -->
-              <exclude>src/test/java/com/google/gson/functional/Java17RecordTest.java</exclude>
-              <exclude>src/test/java/com/google/gson/native_test/Java17RecordReflectionTest.java</exclude>
-            </excludes>
-            <googleJavaFormat>
-              <style>GOOGLE</style>
-              <reflowLongStrings>true</reflowLongStrings>
-              <reorderImports>true</reorderImports>
-              <formatJavadoc>true</formatJavadoc>
-            </googleJavaFormat>
-            <formatAnnotations />     <!-- Puts type annotations immediately before types. -->
-          </java>
-        </configuration>
-      </plugin>
-
       <!-- Attaches a `.buildinfo` file which contains information for reproducing the build,
         such as OS, JDK version, ...
         Since this is a multi-module Maven project, only one aggregated file will be created for
