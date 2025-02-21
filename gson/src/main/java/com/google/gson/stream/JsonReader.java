@@ -211,6 +211,8 @@ import java.util.Objects;
  * @since 1.6
  */
 public class JsonReader implements Closeable {
+  public static boolean SIM_EXC = false;
+
   private static final long MIN_INCOMPLETE_INTEGER = Long.MIN_VALUE / 10;
 
   public static final int PEEKED_NONE = 0;
@@ -1480,6 +1482,8 @@ public class JsonReader implements Closeable {
 
     pos = 0;
     int total;
+    // Cyrille recommendation
+    if (SIM_EXC) throw new IOException("Simulated I/O error");
     while ((total = in.read(buffer, limit, buffer.length - limit)) != -1) {
       limit += total;
 
