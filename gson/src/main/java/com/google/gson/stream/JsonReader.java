@@ -1375,77 +1375,90 @@ public class JsonReader implements Closeable {
     int count = 0;
     do {
       int p = peeked;
-      if (p == PEEKED_NONE) {
+      if (p == PEEKED_NONE) { // branch1
         p = doPeek();
       }
 
-      switch (p) {
-        case PEEKED_BEGIN_ARRAY:
-          push(JsonScope.EMPTY_ARRAY);
-          count++;
-          break;
-        case PEEKED_BEGIN_OBJECT:
-          push(JsonScope.EMPTY_OBJECT);
-          count++;
-          break;
-        case PEEKED_END_ARRAY:
-          stackSize--;
-          count--;
-          break;
-        case PEEKED_END_OBJECT:
-          // Only update when object end is explicitly skipped, otherwise stack is not updated
-          // anyways
-          if (count == 0) {
-            // Free the last path name so that it can be garbage collected
-            pathNames[stackSize - 1] = null;
-          }
-          stackSize--;
-          count--;
-          break;
-        case PEEKED_UNQUOTED:
-          skipUnquotedValue();
-          break;
-        case PEEKED_SINGLE_QUOTED:
-          skipQuotedValue('\'');
-          break;
-        case PEEKED_DOUBLE_QUOTED:
-          skipQuotedValue('"');
-          break;
-        case PEEKED_UNQUOTED_NAME:
-          skipUnquotedValue();
-          // Only update when name is explicitly skipped, otherwise stack is not updated anyways
-          if (count == 0) {
-            pathNames[stackSize - 1] = "<skipped>";
-          }
-          break;
-        case PEEKED_SINGLE_QUOTED_NAME:
-          skipQuotedValue('\'');
-          // Only update when name is explicitly skipped, otherwise stack is not updated anyways
-          if (count == 0) {
-            pathNames[stackSize - 1] = "<skipped>";
-          }
-          break;
-        case PEEKED_DOUBLE_QUOTED_NAME:
-          skipQuotedValue('"');
-          // Only update when name is explicitly skipped, otherwise stack is not updated anyways
-          if (count == 0) {
-            pathNames[stackSize - 1] = "<skipped>";
-          }
-          break;
-        case PEEKED_NUMBER:
-          pos += peekedNumberLength;
-          break;
-        case PEEKED_EOF:
-          // Do nothing
-          return;
-        default:
-          // For all other tokens there is nothing to do; token has already been consumed from
-          // underlying reader
+      if (isStartToken(p)) {
+        count += handleStartToken(p);
+      } else if (isEndToken(p)) {
+        count += handleEndToken(p, count);
+      } else {
+        handleValueToken(p, count);
       }
+
       peeked = PEEKED_NONE;
-    } while (count > 0);
+    } while (count > 0); // branch19
 
     pathIndices[stackSize - 1]++;
+  }
+
+  private boolean isStartToken(int p) {
+    return p == PEEKED_BEGIN_ARRAY || p == PEEKED_BEGIN_OBJECT;
+  }
+
+  private int handleStartToken(int p) throws IOException {
+    if (p == PEEKED_BEGIN_ARRAY) { // branch2
+      push(JsonScope.EMPTY_ARRAY);
+    } else if (p == PEEKED_BEGIN_OBJECT) { // branch3
+      push(JsonScope.EMPTY_OBJECT);
+    }
+    return 1;
+  }
+
+  private boolean isEndToken(int p) {
+    return p == PEEKED_END_ARRAY || p == PEEKED_END_OBJECT;
+  }
+
+  private int handleEndToken(int p, int count) {
+    if (p == PEEKED_END_ARRAY) { // branch4
+      stackSize--;
+    } else if (p == PEEKED_END_OBJECT) { // branch5
+      if (count == 0) { // branch6
+        pathNames[stackSize - 1] = null;
+      }
+      stackSize--;
+    }
+    return -1;
+  }
+
+  private void handleValueToken(int p, int count) throws IOException {
+    switch (p) {
+      case PEEKED_UNQUOTED: // branch7
+        skipUnquotedValue();
+        break;
+      case PEEKED_SINGLE_QUOTED: // branch8
+        skipQuotedValue('\'');
+        break;
+      case PEEKED_DOUBLE_QUOTED: // branch9
+        skipQuotedValue('"');
+        break;
+      case PEEKED_UNQUOTED_NAME: // branch10
+        skipUnquotedValue();
+        if (count == 0) { // branch11
+          pathNames[stackSize - 1] = "<skipped>";
+        }
+        break;
+      case PEEKED_SINGLE_QUOTED_NAME: // branch12
+        skipQuotedValue('\'');
+        if (count == 0) { // branch13
+          pathNames[stackSize - 1] = "<skipped>";
+        }
+        break;
+      case PEEKED_DOUBLE_QUOTED_NAME: // branch14
+        skipQuotedValue('"');
+        if (count == 0) { // branch15
+          pathNames[stackSize - 1] = "<skipped>";
+        }
+        break;
+      case PEEKED_NUMBER: // branch16
+        pos += peekedNumberLength;
+        break;
+      case PEEKED_EOF: // branch17
+        return;
+      default: // branch18
+        // Do nothing
+    }
   }
 
   private void push(int newTop) throws MalformedJsonException {
