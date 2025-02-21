@@ -1162,6 +1162,37 @@ public class JsonReader implements Closeable {
     }
   }
 
+  /**
+ * Checks if the character is a non-literal character.
+ * If the character triggers leniency (e.g., '#', ';'), calls checkLenient().
+ * Returns true if the character is a non-literal character, false otherwise.
+ */
+private boolean isNonLiteralCharacter(char c) throws IOException {
+    switch (c) {
+        case '/':
+        case '\\':
+        case ';':
+        case '#':
+        case '=':
+            checkLenient(); // Trigger leniency check
+            // Fall through to handle non-literal characters
+        case '{':
+        case '}':
+        case '[':
+        case ']':
+        case ':':
+        case ',':
+        case ' ':
+        case '\t':
+        case '\f':
+        case '\r':
+        case '\n':
+            return true; // Non-literal character
+        default:
+            return false; // Literal character
+    }
+  }
+
   /** Returns an unquoted value as a string. */
   @SuppressWarnings("fallthrough")
   private String nextUnquotedValue() throws IOException {
@@ -1171,27 +1202,8 @@ public class JsonReader implements Closeable {
     findNonLiteralCharacter:
     while (true) {
       for (; pos + i < limit; i++) {
-        switch (buffer[pos + i]) {
-          case '/':
-          case '\\':
-          case ';':
-          case '#':
-          case '=':
-            checkLenient(); // fall-through
-          case '{':
-          case '}':
-          case '[':
-          case ']':
-          case ':':
-          case ',':
-          case ' ':
-          case '\t':
-          case '\f':
-          case '\r':
-          case '\n':
+        if (isNonLiteralCharacter(buffer[pos + i])) {
             break findNonLiteralCharacter;
-          default:
-            // skip character to be included in string value
         }
       }
 
