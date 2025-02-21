@@ -213,7 +213,7 @@ import java.util.Objects;
 public class JsonReader implements Closeable {
   private static final long MIN_INCOMPLETE_INTEGER = Long.MIN_VALUE / 10;
 
-  private static final int PEEKED_NONE = 0;
+  public static final int PEEKED_NONE = 0;
   private static final int PEEKED_BEGIN_OBJECT = 1;
   private static final int PEEKED_END_OBJECT = 2;
   private static final int PEEKED_BEGIN_ARRAY = 3;
@@ -266,8 +266,8 @@ public class JsonReader implements Closeable {
    */
   private final char[] buffer = new char[BUFFER_SIZE];
 
-  private int pos = 0;
-  private int limit = 0;
+  public int pos = 0;
+  public int limit = 0;
 
   private int lineNumber = 0;
   private int lineStart = 0;
@@ -717,7 +717,7 @@ public class JsonReader implements Closeable {
     return peeked = PEEKED_UNQUOTED;
   }
 
-  private int peekKeyword() throws IOException {
+  public int peekKeyword() throws IOException {
     // Figure out which keyword we're matching against by its first character.
     char c = buffer[pos];
     String keyword;
@@ -1468,7 +1468,7 @@ public class JsonReader implements Closeable {
    * Returns true once {@code limit - pos >= minimum}. If the data is exhausted before that many
    * characters are available, this returns false.
    */
-  private boolean fillBuffer(int minimum) throws IOException {
+  public boolean fillBuffer(int minimum) throws IOException {
     char[] buffer = this.buffer;
     lineStart -= pos;
     if (limit != pos) {

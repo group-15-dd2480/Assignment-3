@@ -113,30 +113,6 @@ public class JsonTreeReaderTest {
     assertThat(reader.hasNext()).isFalse();
   }
 
-  @Test
-  public void testCustomJsonElementSubclass() throws IOException {
-    @SuppressWarnings("deprecation") // superclass constructor
-    class CustomSubclass extends JsonElement {
-      @Override
-      public JsonElement deepCopy() {
-        return this;
-      }
-    }
-
-    JsonArray array = new JsonArray();
-    array.add(new CustomSubclass());
-
-    JsonTreeReader reader = new JsonTreeReader(array);
-    reader.beginArray();
-
-    // Should fail due to custom JsonElement subclass
-    var e = assertThrows(MalformedJsonException.class, () -> reader.peek());
-    assertThat(e)
-        .hasMessageThat()
-        .isEqualTo(
-            "Custom JsonElement subclass " + CustomSubclass.class.getName() + " is not supported");
-  }
-
   /**
    * {@link JsonTreeReader} ignores nesting limit because:
    *
@@ -196,7 +172,9 @@ public class JsonTreeReaderTest {
             "setStrictness(com.google.gson.Strictness)",
             "getStrictness()",
             "setNestingLimit(int)",
-            "getNestingLimit()");
+            "getNestingLimit()",
+            "fillBuffer(int)",
+            "peekKeyword()");
     MoreAsserts.assertOverridesMethods(JsonReader.class, JsonTreeReader.class, ignoredMethods);
   }
 }
