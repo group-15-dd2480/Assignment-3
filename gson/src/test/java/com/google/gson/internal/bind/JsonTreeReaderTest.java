@@ -174,7 +174,10 @@ public class JsonTreeReaderTest {
             "setNestingLimit(int)",
             "getNestingLimit()",
             "fillBuffer(int)",
-            "peekKeyword()");
+            "peekKeyword()",
+            "skipTo(java.lang.String)"
+        );
+
     MoreAsserts.assertOverridesMethods(JsonReader.class, JsonTreeReader.class, ignoredMethods);
   }
 }
