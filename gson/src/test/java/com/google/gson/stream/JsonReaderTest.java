@@ -214,6 +214,30 @@ public final class JsonReaderTest {
   }
 
   @Test
+  public void testCheckLenientInContext() throws IOException {
+    String json = "{key: value#comment}"; // '#' triggers checkLenient()
+    JsonReader reader = new JsonReader(new StringReader(json));
+    reader.setStrictness(Strictness.STRICT); // Set strictness to STRICT
+
+    // Assert that parsing throws MalformedJsonException
+    IOException exception =
+        assertThrows(
+            IOException.class,
+            () -> {
+              reader.beginObject(); // Parses `{`
+              String unused = reader.nextName(); // Assign the result to a variable
+              reader.nextString(); // Parses `value#comment` (triggers checkLenient())
+            });
+
+    // Verify the exception message starts with the expected text
+    assertThat(exception)
+        .hasMessageThat()
+        .startsWith(
+            "Use JsonReader.setStrictness(Strictness.LENIENT) to accept malformed JSON"
+                + " at line 1 column 3 path $");
+  }
+
+  @Test
   public void testReadArray() throws IOException {
     JsonReader reader = new JsonReader(reader("[true, true]"));
     reader.beginArray();
