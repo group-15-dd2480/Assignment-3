@@ -52,6 +52,8 @@
     <gson.isInternalModule>${gson.isTestModule}</gson.isInternalModule>
   </properties>
 
+
+
   <!-- These attributes specify that the URLs should be inherited by the modules as is, to avoid constructing
     invalid URLs, see also https://maven.apache.org/ref/3.9.1/maven-model-builder/index.html#inheritance-assembly -->
   <scm child.scm.url.inherit.append.path="false" child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false">
@@ -95,6 +97,13 @@
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.13.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.javaparser</groupId>
+        <artifactId>javaparser-core</artifactId>
+        <version>3.26.3</version>
+        <scope>compile</scope>
       </dependency>
 
       <dependency>
