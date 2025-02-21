@@ -1164,65 +1164,111 @@ public class JsonReader implements Closeable {
     }
   }
 
-  /** Returns an unquoted value as a string. */
-  @SuppressWarnings("fallthrough")
-  private String nextUnquotedValue() throws IOException {
-    StringBuilder builder = null;
-    int i = 0;
-
-    findNonLiteralCharacter:
-    while (true) {
-      for (; pos + i < limit; i++) {
-        switch (buffer[pos + i]) {
-          case '/':
-          case '\\':
-          case ';':
-          case '#':
-          case '=':
-            checkLenient(); // fall-through
-          case '{':
-          case '}':
-          case '[':
-          case ']':
-          case ':':
-          case ',':
-          case ' ':
-          case '\t':
-          case '\f':
-          case '\r':
-          case '\n':
-            break findNonLiteralCharacter;
-          default:
-            // skip character to be included in string value
+    /** Returns an unquoted value as a string. */
+    @SuppressWarnings("fallthrough")
+    private String nextUnquotedValue() throws IOException {
+      StringBuilder builder = null;
+      int i = 0;
+  
+      Coverage.sample();
+      findNonLiteralCharacter:
+      // +1
+      while (true) {
+        // +1
+        Coverage.sample();
+        for (; pos + i < limit; i++) {
+          Coverage.sample();
+          switch (buffer[pos + i]) {
+            // +1
+            case '/':
+              Coverage.sample();
+            // +1
+            case '\\':
+              Coverage.sample();
+            // +1
+            case ';':
+              Coverage.sample();
+            // +1
+            case '#':
+              Coverage.sample();
+            // +1
+            case '=':
+              Coverage.sample();
+              checkLenient(); // fall-through
+            // +1
+            case '{':
+              Coverage.sample();
+            // +1
+            case '}': 
+              Coverage.sample();
+            // +1
+            case '[':
+              Coverage.sample();
+            // +1
+            case ']':
+              Coverage.sample();
+            // +1
+            case ':':
+              Coverage.sample();
+            // +1
+            case ',':
+              Coverage.sample();
+            // +1
+            case ' ':
+              Coverage.sample();
+            // +1
+            case '\t':
+              Coverage.sample();
+            // +1
+            case '\f':
+              Coverage.sample();
+            // +1
+            case '\r':
+              Coverage.sample();
+            // +1
+            case '\n':
+              Coverage.sample();
+              break findNonLiteralCharacter;
+            default:
+              // skip character to be included in string value
+          }
         }
-      }
-
-      // Attempt to load the entire literal into the buffer at once.
-      if (i < buffer.length) {
-        if (fillBuffer(i + 1)) {
-          continue;
-        } else {
+  
+         // Attempt to load the entire literal into the buffer at once.
+        // +1
+        if (i < buffer.length) {
+            Coverage.sample();
+          // +1
+          if (fillBuffer(i + 1)) {
+            Coverage.sample();
+            continue;
+          } else {
+            Coverage.sample();
+            break;
+          }
+        }
+  
+        // use a StringBuilder when the value is too long. This is too long to be a number!
+        // +1
+        if (builder == null) {
+          Coverage.sample();
+          builder = new StringBuilder(Math.max(i, 16));
+        }
+        builder.append(buffer, pos, i);
+        pos += i;
+        i = 0;
+        // +1
+        if (!fillBuffer(1)) {
+          Coverage.sample();
           break;
         }
       }
-
-      // use a StringBuilder when the value is too long. This is too long to be a number!
-      if (builder == null) {
-        builder = new StringBuilder(Math.max(i, 16));
-      }
-      builder.append(buffer, pos, i);
+      // +1
+      String result =
+          (builder == null) ? new String(buffer, pos, i) : builder.append(buffer, pos, i).toString();
       pos += i;
-      i = 0;
-      if (!fillBuffer(1)) {
-        break;
-      }
+      return result;
     }
-
-    String result =
-        (builder == null) ? new String(buffer, pos, i) : builder.append(buffer, pos, i).toString();
-    pos += i;
-    return result;
-  }
 
   private void skipQuotedValue(char quote) throws IOException {
     // Like nextNonWhitespace, this uses locals 'p' and 'l' to save inner-loop field access.
