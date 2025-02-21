@@ -215,6 +215,28 @@ public final class JsonReaderTest {
   }
 
   @Test
+  public void testCheckLenientIsExecutedInNextUnquotedValue() throws IOException {
+      // Input contains '#' which should trigger checkLenient() inside nextUnquotedValue()
+      JsonReader reader = new JsonReader(reader("unquoted#comment"));
+      reader.setStrictness(Strictness.LENIENT); // Enable lenient mode
+
+      String result = reader.nextString(); // This should execute nextUnquotedValue() internally
+
+      assertThat(result).isEqualTo("unquoted"); // It should return the value before '#'
+  }
+
+  @Test
+  public void testCheckLenientIsExecutedInSkipUnquotedValue() throws IOException {
+      // Input contains '#' which should trigger checkLenient() inside skipUnquotedValue()
+      JsonReader reader = new JsonReader(reader("unquoted#comment"));
+      reader.setStrictness(Strictness.LENIENT); // Enable lenient mode
+
+      reader.skipValue(); // Should trigger skipUnquotedValue() and execute checkLenient()
+
+      // No exception means checkLenient() allowed the value in lenient mode
+  }
+
+  @Test
   public void testReadArray() throws IOException {
     JsonReader reader = new JsonReader(reader("[true, true]"));
     reader.beginArray();
