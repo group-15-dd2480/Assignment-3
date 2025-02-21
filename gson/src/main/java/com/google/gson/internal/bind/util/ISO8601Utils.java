@@ -164,121 +164,24 @@ public class ISO8601Utils {
       // extract day
       int day = parseInt(date, offset, offset += 2);
 
-      // default time value
-      int hour = 0;
-      int minutes = 0;
-      int seconds = 0;
+      // extract 'T' or time
+      ParsePosition timePos = new ParsePosition(offset);
+      int[] time = parseTime(date, timePos, year, month, day);
+      offset = timePos.getIndex();
 
-      // always use 0 otherwise returned date will include millis of current time
-      int milliseconds = 0;
-
-      // if the value has no time component (and no time zone), we are done
-      boolean hasT = checkOffset(date, offset, 'T');
-
-      if (!hasT && (date.length() <= offset)) {
-        Calendar calendar = new GregorianCalendar(year, month - 1, day);
-        calendar.setLenient(false);
-
-        pos.setIndex(offset);
-        return calendar.getTime();
-      }
-
-      if (hasT) {
-
-        // extract hours, minutes, seconds and milliseconds
-        hour = parseInt(date, offset += 1, offset += 2);
-        if (checkOffset(date, offset, ':')) {
-          offset += 1;
-        }
-
-        minutes = parseInt(date, offset, offset += 2);
-        if (checkOffset(date, offset, ':')) {
-          offset += 1;
-        }
-        // second and milliseconds can be optional
-        if (date.length() > offset) {
-          char c = date.charAt(offset);
-          if (c != 'Z' && c != '+' && c != '-') {
-            seconds = parseInt(date, offset, offset += 2);
-            if (seconds > 59 && seconds < 63) {
-              seconds = 59; // truncate up to 3 leap seconds
-            }
-            // milliseconds can be optional in the format
-            if (checkOffset(date, offset, '.')) {
-              offset += 1;
-              int endOffset = indexOfNonDigit(date, offset + 1); // assume at least one digit
-              int parseEndOffset = Math.min(endOffset, offset + 3); // parse up to 3 digits
-              int fraction = parseInt(date, offset, parseEndOffset);
-              // compensate for "missing" digits
-              switch (parseEndOffset - offset) { // number of digits parsed
-                case 2:
-                  milliseconds = fraction * 10;
-                  break;
-                case 1:
-                  milliseconds = fraction * 100;
-                  break;
-                default:
-                  milliseconds = fraction;
-              }
-              offset = endOffset;
-            }
-          }
-        }
-      }
+      int hour = time[0];
+      int minutes = time[1];
+      int seconds = time[2];
+      int milliseconds = time[3];
 
       // extract timezone
       if (date.length() <= offset) {
         throw new IllegalArgumentException("No time zone indicator");
       }
 
-      TimeZone timezone = null;
-      char timezoneIndicator = date.charAt(offset);
-
-      if (timezoneIndicator == 'Z') {
-        timezone = TIMEZONE_UTC;
-        offset += 1;
-      } else if (timezoneIndicator == '+' || timezoneIndicator == '-') {
-        String timezoneOffset = date.substring(offset);
-
-        // When timezone has no minutes, we should append it, valid timezones are, for example:
-        // +00:00, +0000 and +00
-        timezoneOffset = timezoneOffset.length() >= 5 ? timezoneOffset : timezoneOffset + "00";
-
-        offset += timezoneOffset.length();
-        // 18-Jun-2015, tatu: Minor simplification, skip offset of "+0000"/"+00:00"
-        if (timezoneOffset.equals("+0000") || timezoneOffset.equals("+00:00")) {
-          timezone = TIMEZONE_UTC;
-        } else {
-          // 18-Jun-2015, tatu: Looks like offsets only work from GMT, not UTC...
-          //    not sure why, but that's the way it looks. Further, Javadocs for
-          //    `java.util.TimeZone` specifically instruct use of GMT as base for
-          //    custom timezones... odd.
-          String timezoneId = "GMT" + timezoneOffset;
-          // String timezoneId = "UTC" + timezoneOffset;
-
-          timezone = TimeZone.getTimeZone(timezoneId);
-
-          String act = timezone.getID();
-          if (!act.equals(timezoneId)) {
-            /* 22-Jan-2015, tatu: Looks like canonical version has colons, but we may be given
-             *    one without. If so, don't sweat.
-             *   Yes, very inefficient. Hopefully not hit often.
-             *   If it becomes a perf problem, add 'loose' comparison instead.
-             */
-            String cleaned = act.replace(":", "");
-            if (!cleaned.equals(timezoneId)) {
-              throw new IndexOutOfBoundsException(
-                  "Mismatching time zone indicator: "
-                      + timezoneId
-                      + " given, resolves to "
-                      + timezone.getID());
-            }
-          }
-        }
-      } else {
-        throw new IndexOutOfBoundsException(
-            "Invalid time zone indicator '" + timezoneIndicator + "'");
-      }
+      ParsePosition timezonePos = new ParsePosition(offset);
+      TimeZone timezone = parseTimezone(date, timezonePos);
+      offset = timezonePos.getIndex();
 
       Calendar calendar = new GregorianCalendar(timezone);
       calendar.setLenient(false);
@@ -306,6 +209,153 @@ public class ISO8601Utils {
         new ParseException("Failed to parse date [" + input + "]: " + msg, pos.getIndex());
     ex.initCause(fail);
     throw ex;
+  }
+
+  /**
+   * Parse the time component of a ISO8601 date string.
+   * 
+   * @param date the date to parse
+   * @param pos the position to start parsing from, updated to where parsing stopped
+   * @param year the year of the date
+   * @param month the month of the date
+   * @param day the day of the date
+   * @return an array containing the hour, minutes, seconds and milliseconds parsed
+   */
+  private static int[] parseTime(String date, ParsePosition pos, int year, int month, int day) {
+    int offset = pos.getIndex();
+    
+    // default time value
+    int hour = 0;
+    int minutes = 0;
+    int seconds = 0;
+
+    // always use 0 otherwise returned date will include millis of current time
+    int milliseconds = 0;
+
+    // if the value has no time component (and no time zone), we are done
+    boolean hasT = checkOffset(date, offset, 'T');
+
+    if (!hasT && (date.length() <= offset)) {
+      Calendar calendar = new GregorianCalendar(year, month - 1, day);
+      calendar.setLenient(false);
+
+      hour = calendar.get(Calendar.HOUR_OF_DAY);
+      minutes = calendar.get(Calendar.MINUTE);
+      seconds = calendar.get(Calendar.SECOND);
+      milliseconds = calendar.get(Calendar.MILLISECOND);
+
+      pos.setIndex(offset);
+      return new int[] {hour, minutes, seconds, milliseconds};
+    }
+
+    if (hasT) {
+
+      // extract hours, minutes, seconds and milliseconds
+      hour = parseInt(date, offset += 1, offset += 2);
+      if (checkOffset(date, offset, ':')) {
+        offset += 1;
+      }
+
+      minutes = parseInt(date, offset, offset += 2);
+      if (checkOffset(date, offset, ':')) {
+        offset += 1;
+      }
+      // second and milliseconds can be optional
+      if (date.length() > offset) {
+        char c = date.charAt(offset);
+        if (c != 'Z' && c != '+' && c != '-') {
+          seconds = parseInt(date, offset, offset += 2);
+          if (seconds > 59 && seconds < 63) {
+            seconds = 59; // truncate up to 3 leap seconds
+          }
+          // milliseconds can be optional in the format
+          if (checkOffset(date, offset, '.')) {
+            offset += 1;
+            int endOffset = indexOfNonDigit(date, offset + 1); // assume at least one digit
+            int parseEndOffset = Math.min(endOffset, offset + 3); // parse up to 3 digits
+            int fraction = parseInt(date, offset, parseEndOffset);
+            // compensate for "missing" digits
+            switch (parseEndOffset - offset) { // number of digits parsed
+              case 2:
+                milliseconds = fraction * 10;
+                break;
+              case 1:
+                milliseconds = fraction * 100;
+                break;
+              default:
+                milliseconds = fraction;
+            }
+            offset = endOffset;
+          }
+        }
+      }
+    }
+
+    pos.setIndex(offset);
+    return new int[] {hour, minutes, seconds, milliseconds};
+  }
+
+  /**
+   * Parse a timezone from a formatted ISO8601 date string.
+   * 
+   * @param date the date to parse
+   * @param pos the position to start parsing from, updated to where parsing stopped
+   * @return the parsed timezone, or null if the date string does not contain a timezone
+   */
+  private static TimeZone parseTimezone(String date, ParsePosition pos) {
+    int offset = pos.getIndex();
+
+    TimeZone timezone = null;
+    char timezoneIndicator = date.charAt(offset);
+
+    if (timezoneIndicator == 'Z') {
+      timezone = TIMEZONE_UTC;
+      offset += 1;
+    } else if (timezoneIndicator == '+' || timezoneIndicator == '-') {
+      String timezoneOffset = date.substring(offset);
+
+      // When timezone has no minutes, we should append it, valid timezones are, for example:
+      // +00:00, +0000 and +00
+      timezoneOffset = timezoneOffset.length() >= 5 ? timezoneOffset : timezoneOffset + "00";
+
+      offset += timezoneOffset.length();
+      // 18-Jun-2015, tatu: Minor simplification, skip offset of "+0000"/"+00:00"
+      if (timezoneOffset.equals("+0000") || timezoneOffset.equals("+00:00")) {
+        timezone = TIMEZONE_UTC;
+      } else {
+        // 18-Jun-2015, tatu: Looks like offsets only work from GMT, not UTC...
+        //    not sure why, but that's the way it looks. Further, Javadocs for
+        //    `java.util.TimeZone` specifically instruct use of GMT as base for
+        //    custom timezones... odd.
+        String timezoneId = "GMT" + timezoneOffset;
+        // String timezoneId = "UTC" + timezoneOffset;
+
+        timezone = TimeZone.getTimeZone(timezoneId);
+
+        String act = timezone.getID();
+        if (!act.equals(timezoneId)) {
+          /* 22-Jan-2015, tatu: Looks like canonical version has colons, but we may be given
+            *    one without. If so, don't sweat.
+            *   Yes, very inefficient. Hopefully not hit often.
+            *   If it becomes a perf problem, add 'loose' comparison instead.
+            */
+          String cleaned = act.replace(":", "");
+          if (!cleaned.equals(timezoneId)) {
+            throw new IndexOutOfBoundsException(
+                "Mismatching time zone indicator: "
+                    + timezoneId
+                    + " given, resolves to "
+                    + timezone.getID());
+          }
+        }
+      }
+    } else {
+      throw new IndexOutOfBoundsException(
+          "Invalid time zone indicator '" + timezoneIndicator + "'");
+    }
+
+    pos.setIndex(offset);
+    return timezone;
   }
 
   /**
