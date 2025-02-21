@@ -2093,6 +2093,21 @@ public final class JsonReaderTest {
             "Unterminated string at line 1 column 9 path $[0]\n"
                 + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
   }
+  @Test
+  public void testUnknownScopeThrowsAssertionError() {
+    JsonReader reader = new JsonReader(reader("{\"test\": \"string"));
+    reader.stack[0] = -999; // Invalid scope value
+    reader.stackSize = 1;
+
+    AssertionError thrown =
+            assertThrows(
+                    AssertionError.class,
+                    () -> {
+                      reader.getPath(false);
+                    });
+
+    assertThat(thrown).hasMessageThat().contains("Unknown scope value");
+  }
 
   /** Regression test for an issue with buffer filling and consumeNonExecutePrefix. */
   @Test
