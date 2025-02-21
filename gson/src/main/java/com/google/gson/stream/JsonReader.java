@@ -1529,9 +1529,13 @@ public class JsonReader implements Closeable {
           // +1
           Coverage.sample();
           break;
+        } else {
+          Coverage.sample();
         }
         p = pos;
         l = limit;
+      } else {
+        Coverage.sample();
       }
 
       int c = buffer[p++];
@@ -1545,6 +1549,8 @@ public class JsonReader implements Closeable {
         // +1
         Coverage.sample();
         continue;
+      } else {
+        Coverage.sample();
       }
 
       if (c == '/') {
@@ -1561,7 +1567,11 @@ public class JsonReader implements Closeable {
             // +1
             Coverage.sample();
             return c;
+          } else {
+            Coverage.sample();
           }
+        } else {
+          Coverage.sample();
         }
 
         checkLenient();
@@ -1576,6 +1586,8 @@ public class JsonReader implements Closeable {
               // +1
               Coverage.sample();
               throw syntaxError("Unterminated comment");
+            } else {
+              Coverage.sample();
             }
             p = pos + 2;
             l = limit;
@@ -1610,7 +1622,6 @@ public class JsonReader implements Closeable {
         p = pos;
         l = limit;
       } else {
-        // +1
         Coverage.sample();
         pos = p;
         return c;
@@ -1621,7 +1632,6 @@ public class JsonReader implements Closeable {
       Coverage.sample();
       throw new EOFException("End of input" + locationString());
     } else {
-      // +1
       Coverage.sample();
       return -1;
     }
