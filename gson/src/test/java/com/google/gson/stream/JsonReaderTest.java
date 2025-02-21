@@ -2109,6 +2109,18 @@ public final class JsonReaderTest {
 
     assertThat(thrown).hasMessageThat().contains("Unknown scope value");
   }
+  @Test
+  public void testSkipToReturnsFalse() throws IOException {
+    // Create a reader with input that does not contain the target string
+    JsonReader reader = new JsonReader(new StringReader("[123, 456, 789]"));
+    reader.setStrictness(Strictness.LENIENT);
+
+    // Use reflection or directly access skipTo if it's accessible for testing
+    boolean result = reader.skipTo("nonexistent");
+
+    // Assert that the method returns false since the string is not found
+    assertThat(result).isFalse();
+  }
 
   /** Regression test for an issue with buffer filling and consumeNonExecutePrefix. */
   @Test

@@ -1618,7 +1618,7 @@ public class JsonReader implements Closeable {
   /**
    * @param toFind a string to search for. Must not contain a newline.
    */
-  private boolean skipTo(String toFind) throws IOException {
+  public boolean skipTo(String toFind) throws IOException {
     int length = toFind.length();
     outer:
     for (; pos + length <= limit || fillBuffer(length); pos++) {
